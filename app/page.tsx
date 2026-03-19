@@ -1,229 +1,235 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { app } from "../lib/firebase";
-
-type NavTab = "feed" | "scores" | "tracker" | "profile";
+import { useEffect } from "react";
+import { app } from "@/lib/firebase";
 
 export default function Home() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<NavTab>("scores");
 
   useEffect(() => {
-    console.log("Firebase App Initialized on Home Page:", app);
+    // Log to console to verify Firebase app is initialized
+    console.log("Firebase app initialized:", app.name);
   }, []);
 
+  const handleNavigationClick = (page: string) => {
+    router.push(`/${page}`);
+  };
+
   return (
-    <>
-      <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-4 md:px-8 h-16">
-        <div className="flex items-center gap-3">
-          <div className="relative shrink-0">
-            <Image
-              src="https://via.placeholder.com/32"
-              alt="User Profile"
-              className="w-8 h-8 rounded-full bg-surface-container-highest object-cover"
-              width={32}
-              height={32}
-            />
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-surface"></span>
+    <div className="flex min-h-screen bg-surface text-on-background font-body">
+      {/* Sidebar Navigation */}
+      <aside className="fixed left-0 top-0 h-full w-64 z-40 bg-slate-950/40 backdrop-blur-2xl border-r border-slate-800/20 flex flex-col pt-20 pb-8 px-4 hidden lg:flex">
+        <div className="mb-8 px-2">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-primary-container text-sm">analytics</span>
+            </div>
+            <div>
+              <h2 className="text-emerald-400 font-extrabold text-lg leading-tight">SprizzyBet</h2>
+              <p className="text-slate-500 text-xs font-semibold">The Ethereal Analyst</p>
+            </div>
           </div>
-          <span className="text-xl font-black text-primary italic tracking-tighter font-headline select-none">SprizzyBet</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-6 mr-4">
-            <button 
-              onClick={() => setActiveTab("feed")}
-              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "feed" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
-            >
+        <nav className="flex-1 space-y-1">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 text-emerald-400 bg-emerald-500/10 border-r-4 border-emerald-400 rounded-l-xl translate-x-1 transition-transform text-left"
+          >
+            <span className="material-symbols-outlined">dynamic_feed</span>
+            <span className="font-semibold text-sm">Feed</span>
+          </button>
+          <button
+            onClick={() => handleNavigationClick("scores")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/30 hover:text-slate-200 rounded-xl transition-all text-left"
+          >
+            <span className="material-symbols-outlined">sports_score</span>
+            <span className="font-semibold text-sm">Scores</span>
+          </button>
+          <button
+            onClick={() => handleNavigationClick("tracker")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/30 hover:text-slate-200 rounded-xl transition-all text-left"
+          >
+            <span className="material-symbols-outlined">analytics</span>
+            <span className="font-semibold text-sm">Tracker</span>
+          </button>
+          <button
+            onClick={() => handleNavigationClick("profile")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/30 hover:text-slate-200 rounded-xl transition-all text-left"
+          >
+            <span className="material-symbols-outlined">person</span>
+            <span className="font-semibold text-sm">Profile</span>
+          </button>
+        </nav>
+        <div className="mt-auto space-y-1 pt-6 border-t border-outline-variant/10">
+          <button className="w-full bg-primary text-on-primary font-bold py-3 rounded-full mb-4 shadow-lg shadow-primary/10 hover:scale-105 active:opacity-80 transition-all">
+            Place New Bet
+          </button>
+          <button className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-200 text-sm font-semibold text-left">
+            <span className="material-symbols-outlined text-lg">settings</span>
+            Settings
+          </button>
+          <button className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-200 text-sm font-semibold text-left">
+            <span className="material-symbols-outlined text-lg">help</span>
+            Support
+          </button>
+        </div>
+      </aside>
+
+      {/* Top App Bar */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/60 backdrop-blur-xl border-b border-slate-800/20 shadow-2xl shadow-emerald-900/10 flex justify-between items-center px-8 py-4">
+        <div className="flex items-center gap-8">
+          <h1 className="text-2xl font-black tracking-tighter text-emerald-400 font-headline">SprizzyBet</h1>
+          <nav className="hidden md:flex gap-6 items-center">
+            <button className="font-medium text-emerald-400 border-b-2 border-emerald-400 px-3 py-1">
               Feed
             </button>
-            <button 
-              onClick={() => setActiveTab("scores")}
-              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "scores" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
-            >
+            <button onClick={() => handleNavigationClick("scores")} className="font-medium text-slate-400 hover:bg-slate-800/50 hover:text-emerald-300 transition-all px-3 py-1 rounded-lg">
               Scores
             </button>
-            <button 
-              onClick={() => setActiveTab("tracker")}
-              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "tracker" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
-            >
+            <button onClick={() => handleNavigationClick("tracker")} className="font-medium text-slate-400 hover:bg-slate-800/50 hover:text-emerald-300 transition-all px-3 py-1 rounded-lg">
               Tracker
             </button>
-            <button 
-              onClick={() => setActiveTab("profile")}
-              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "profile" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
-            >
+            <button onClick={() => handleNavigationClick("profile")} className="font-medium text-slate-400 hover:bg-slate-800/50 hover:text-emerald-300 transition-all px-3 py-1 rounded-lg">
               Profile
             </button>
-          </div>
-          <button 
-            onClick={() => router.push("/auth")}
-            className="bg-surface-container-highest/50 px-4 py-1.5 rounded-full border border-outline-variant/20 hover:border-primary/40 interactive-scale transition-all duration-200 hover:bg-surface-container-highest/80"
-          >
-            <span className="font-headline font-bold tracking-tight text-primary">$2,450.00</span>
-          </button>
+          </nav>
         </div>
-      </nav>
-
-      <main className="pt-24 px-4 md:px-8 max-w-5xl mx-auto">
-        <header className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-headline font-extrabold tracking-tight">Live Scores</h1>
-            <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-              <span className="text-[10px] font-label font-bold text-primary uppercase tracking-tighter">14 Games Live</span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20">
+            <span className="material-symbols-outlined text-emerald-400 text-lg">account_balance_wallet</span>
+            <span className="font-bold text-emerald-400">$2,450.00</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+            <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-primary/20">
+              <img 
+                alt="User" 
+                className="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh_shodIWOfVCujH6nVMuefOMdyPg0LRc3gTcOJhZHUZoM1LlZFfJNeux8mYUKVQiLPnJ60Xk9DcnZVeO3A5CS_uQJU38j57nIX-ekqtfT0Bwuo6Hr81H6yiHJTEbz6ys2KfQv3HeGTaeT7uH8W9yPLvyWlocfqLQuRfW2EauFcC3cjdwoBYFohHU2ahM26XiUz021vdwYPOJ8YVm4DQpTfx0IBPgyDA6L7alNyAjdbRuUrZaZMnZsc9n1xj3K-k0X8-7Uh3iHHgqm"
+                width={40}
+                height={40}
+              />
             </div>
           </div>
-          <p className="text-on-surface-variant text-sm max-w-md">Real-time analytical data synchronized with live broadcast speeds. Highlighted cards indicate active wagers.</p>
-        </header>
+        </div>
+      </header>
 
-        <div className="space-y-4">
-          {/* Basketball - Active Bet */}
-          <button 
-            onClick={() => alert("Game details: LAL vs BOS - NBA Regular Season")}
-            className="w-full text-left glass-card bet-glow rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale cursor-pointer"
-          >
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="flex flex-col items-center justify-center bg-surface-container-high w-16 h-16 rounded-xl border border-outline-variant/30 shrink-0">
-                <span className="text-primary font-headline text-xl font-bold">3Q</span>
-                <span className="text-[10px] font-label text-on-surface-variant uppercase">04:12</span>
-              </div>
-              <div className="flex flex-col gap-1 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Active Bet</span>
-                  <span className="text-tertiary text-[10px] font-bold uppercase tracking-widest">NBA • Regular Season</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Image alt="LAL" className="w-6 h-6 object-contain" src="https://via.placeholder.com/24" width={24} height={24} />
-                    <span className="font-headline text-lg font-bold">LAL</span>
-                  </div>
-                  <span className="text-on-surface-variant font-light">@</span>
-                  <div className="flex items-center gap-2">
-                    <Image alt="BOS" className="w-6 h-6 object-contain" src="https://via.placeholder.com/24" width={24} height={24} />
-                    <span className="font-headline text-lg font-bold">BOS</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
-              <div className="flex items-center gap-4 text-center">
-                <div>
-                  <p className="text-[10px] font-label text-on-surface-variant uppercase mb-1">Score</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-headline font-extrabold">98</span>
-                    <span className="text-outline-variant">—</span>
-                    <span className="text-2xl font-headline font-extrabold text-primary">104</span>
-                  </div>
-                </div>
-              </div>
-              <div className="h-10 w-px bg-outline-variant/20 hidden md:block"></div>
-              <div className="flex flex-col items-end">
-                <p className="text-[10px] font-label text-on-surface-variant uppercase mb-1">Edge Status</p>
-                <div className="flex items-center gap-1.5 text-primary">
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
-                  <span className="font-headline font-bold">+4.2%</span>
-                </div>
-              </div>
-            </div>
-          </button>
+      {/* Main Content */}
+      <main className="lg:ml-64 pt-24 px-8 pb-12 w-full">
+        <div className="max-w-4xl">
+          {/* Header */}
+          <div className="mb-12">
+            <h2 className="text-3xl font-extrabold font-headline tracking-tight mb-1">Welcome Back</h2>
+            <p className="text-on-surface-variant text-sm">Here are your recommended picks for today</p>
+          </div>
 
-          {/* Football - Neutral */}
-          <button 
-            onClick={() => alert("Game details: KC vs PHI - NFL Sunday Night")}
-            className="w-full text-left glass-card rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale cursor-pointer">
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="flex flex-col items-center justify-center bg-surface-container-high group-hover:bg-surface-container-highest w-16 h-16 rounded-xl border border-outline-variant/30 transition-colors shrink-0">
-                <span className="text-on-surface font-headline text-xl font-bold">4Q</span>
-                <span className="text-[10px] font-label text-on-surface-variant uppercase">11:45</span>
-              </div>
-              <div className="flex flex-col gap-1 flex-1">
-                <span className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">NFL • Sunday Night</span>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Image alt="KC" className="w-6 h-6 object-contain" src="https://via.placeholder.com/24" width={24} height={24} />
-                    <span className="font-headline text-lg font-bold">KC</span>
-                  </div>
-                  <span className="text-on-surface-variant font-light">@</span>
-                  <div className="flex items-center gap-2">
-                    <Image alt="PHI" className="w-6 h-6 object-contain" src="https://via.placeholder.com/24" width={24} height={24} />
-                    <span className="font-headline text-lg font-bold">PHI</span>
-                  </div>
-                </div>
-              </div>
+          {/* Balance Card */}
+          <div className="glass-card rounded-2xl p-8 border-l-4 border-primary mb-12 bg-gradient-to-br from-primary/10 to-primary/5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Total Bankroll</p>
+              <button
+                onClick={() => router.push("/auth")}
+                className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold hover:opacity-90 transition-opacity"
+              >
+                Update Balance
+              </button>
             </div>
-            <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
-              <div className="flex items-center gap-4 text-center">
-                <div>
-                  <p className="text-[10px] font-label text-on-surface-variant uppercase mb-1">Score</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-headline font-extrabold">24</span>
-                    <span className="text-outline-variant">—</span>
-                    <span className="text-2xl font-headline font-extrabold">21</span>
-                  </div>
-                </div>
-              </div>
-              <div className="h-10 w-px bg-outline-variant/20 hidden md:block"></div>
-              <div className="flex flex-col items-end">
-                <p className="text-[10px] font-label text-on-surface-variant uppercase mb-1">Win Prob</p>
-                <div className="flex items-center gap-1.5 text-tertiary">
-                  <span className="font-headline font-bold text-on-surface">62%</span>
-                </div>
-              </div>
-            </div>
-          </button>
+            <p className="text-5xl font-black font-headline text-primary mb-2">$2,450.00</p>
+            <p className="text-sm text-primary font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg">trending_up</span>
+              +$450.00 this month (22.5% ROI)
+            </p>
+          </div>
 
-          {/* Soccer - Active Bet */}
-          <button 
-            onClick={() => alert("Game details: ARS vs MUN - Premier League")}
-            className="w-full text-left glass-card bet-glow rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale cursor-pointer">
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="flex flex-col items-center justify-center bg-surface-container-high w-16 h-16 rounded-xl border border-outline-variant/30 shrink-0">
-                <span className="text-primary font-headline text-xl font-bold">2H</span>
-                <span className="text-[10px] font-label text-on-surface-variant uppercase">68'</span>
-              </div>
-              <div className="flex flex-col gap-1 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Active Bet</span>
-                  <span className="text-tertiary text-[10px] font-bold uppercase tracking-widest">Premier League</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Image alt="ARS" className="w-6 h-6 object-contain" src="https://via.placeholder.com/24" width={24} height={24} />
-                    <span className="font-headline text-lg font-bold">ARS</span>
-                  </div>
-                  <span className="text-on-surface-variant font-light">@</span>
-                  <div className="flex items-center gap-2">
-                    <Image alt="MUN" className="w-6 h-6 object-contain" src="https://via.placeholder.com/24" width={24} height={24} />
-                    <span className="font-headline text-lg font-bold">MUN</span>
-                  </div>
-                </div>
-              </div>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div className="glass-card rounded-xl p-4">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-tighter mb-2">Win Rate</p>
+              <p className="text-2xl font-black text-primary">58%</p>
+              <p className="text-xs text-on-surface-variant mt-1">29 / 50 bets</p>
             </div>
-            <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
-              <div className="flex items-center gap-4 text-center">
-                <div>
-                  <p className="text-[10px] font-label text-on-surface-variant uppercase mb-1">Score</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-headline font-extrabold">1</span>
-                    <span className="text-outline-variant">—</span>
-                    <span className="text-2xl font-headline font-extrabold text-primary">2</span>
-                  </div>
-                </div>
-              </div>
-              <div className="h-10 w-px bg-outline-variant/20 hidden md:block"></div>
-              <div className="flex flex-col items-end">
-                <p className="text-[10px] font-label text-on-surface-variant uppercase mb-1">Win Prob</p>
-                <div className="flex items-center gap-1.5 text-tertiary">
-                  <span className="font-headline font-bold text-on-surface">38%</span>
-                </div>
-              </div>
+            <div className="glass-card rounded-xl p-4">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-tighter mb-2">Avg Odds</p>
+              <p className="text-2xl font-black text-tertiary">-108</p>
+              <p className="text-xs text-on-surface-variant mt-1">Avg. stake: $80</p>
             </div>
-          </button>
+            <div className="glass-card rounded-xl p-4">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-tighter mb-2">This Month</p>
+              <p className="text-2xl font-black text-emerald-400">+12</p>
+              <p className="text-xs text-on-surface-variant mt-1">consecutive wins</p>
+            </div>
+            <div className="glass-card rounded-xl p-4">
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-tighter mb-2">Pending</p>
+              <p className="text-2xl font-black text-on-surface">3</p>
+              <p className="text-xs text-on-surface-variant mt-1">Live bets</p>
+            </div>
+          </div>
+
+          {/* Live Games */}
+          <div className="mb-12">
+            <h3 className="text-xl font-headline font-extrabold mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">sports_score</span>
+              Live Games
+            </h3>
+            <div className="space-y-4">
+              {[
+                { matchup: "LAL vs BOS", league: "NBA", status: "Live • Q4 8:42", userPick: "LAL -4.5", confidence: "High" },
+                { matchup: "KC vs PHI", league: "NFL", status: "Live • 2:15 Q2", userPick: "KC +3.0", confidence: "Medium" },
+                { matchup: "LIV vs MCI", league: "EPL", status: "Live • 25:30", userPick: "LIV -1", confidence: "High" }
+              ].map((game, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => alert(`Game details: ${game.matchup} - ${game.league}`)}
+                  className="w-full glass-card rounded-xl p-5 hover:bg-surface-container-high/80 transition-all text-left cursor-pointer flex justify-between items-start"
+                >
+                  <div>
+                    <h4 className="font-black text-lg font-headline">{game.matchup}</h4>
+                    <p className="text-xs text-on-surface-variant mt-1">{game.league}</p>
+                    <p className="text-xs text-on-surface-variant mt-2">{game.status}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-block text-xs font-bold px-2 py-1 rounded-lg mb-2 ${
+                      game.confidence === "High"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-tertiary/20 text-tertiary"
+                    }`}>
+                      {game.confidence}
+                    </span>
+                    <p className="text-sm font-bold text-primary">{game.userPick}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Upcoming Value */}
+          <div>
+            <h3 className="text-xl font-headline font-extrabold mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-tertiary">trending_up</span>
+              Upcoming Value
+            </h3>
+            <div className="space-y-3">
+              {[
+                { game: "Boston vs Miami", edge: "+2.8%", line: "BOS -3.5", time: "7:00 PM" },
+                { game: "Eagles vs Cowboys", edge: "+1.5%", line: "PHI -4.0", time: "8:20 PM" },
+                { game: "Arsenal vs Tottenham", edge: "+3.2%", line: "ARS -2.5", time: "12:30 PM" }
+              ].map((bet, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => alert(`Selected: ${bet.game}`)}
+                  className="w-full glass-card rounded-xl p-4 flex justify-between items-center hover:bg-surface-container-high/80 transition-all cursor-pointer"
+                >
+                  <div className="text-left">
+                    <p className="font-bold text-sm">{bet.game}</p>
+                    <p className="text-xs text-on-surface-variant mt-1">{bet.line} • {bet.time}</p>
+                  </div>
+                  <p className="text-xl font-black text-tertiary">{bet.edge}</p>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }
