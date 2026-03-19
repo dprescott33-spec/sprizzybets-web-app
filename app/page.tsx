@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { app } from "../lib/firebase";
 
+type NavTab = "feed" | "scores" | "tracker" | "profile";
+
 export default function Home() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<NavTab>("scores");
+
   useEffect(() => {
     console.log("Firebase App Initialized on Home Page:", app);
   }, []);
@@ -27,12 +33,35 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-6 mr-4">
-            <button className="text-on-surface-variant font-label text-xs uppercase tracking-widest hover:text-primary transition-colors">Feed</button>
-            <button className="text-primary font-label text-xs uppercase tracking-widest">Scores</button>
-            <button className="text-on-surface-variant font-label text-xs uppercase tracking-widest hover:text-primary transition-colors">Tracker</button>
-            <button className="text-on-surface-variant font-label text-xs uppercase tracking-widest hover:text-primary transition-colors">Profile</button>
+            <button 
+              onClick={() => setActiveTab("feed")}
+              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "feed" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
+            >
+              Feed
+            </button>
+            <button 
+              onClick={() => setActiveTab("scores")}
+              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "scores" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
+            >
+              Scores
+            </button>
+            <button 
+              onClick={() => setActiveTab("tracker")}
+              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "tracker" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
+            >
+              Tracker
+            </button>
+            <button 
+              onClick={() => setActiveTab("profile")}
+              className={`font-label text-xs uppercase tracking-widest transition-colors ${activeTab === "profile" ? "text-primary" : "text-on-surface-variant hover:text-primary"}`}
+            >
+              Profile
+            </button>
           </div>
-          <button className="bg-surface-container-highest/50 px-4 py-1.5 rounded-full border border-outline-variant/20 hover:border-primary/40 interactive-scale transition-all duration-200">
+          <button 
+            onClick={() => router.push("/auth")}
+            className="bg-surface-container-highest/50 px-4 py-1.5 rounded-full border border-outline-variant/20 hover:border-primary/40 interactive-scale transition-all duration-200 hover:bg-surface-container-highest/80"
+          >
             <span className="font-headline font-bold tracking-tight text-primary">$2,450.00</span>
           </button>
         </div>
@@ -52,7 +81,10 @@ export default function Home() {
 
         <div className="space-y-4">
           {/* Basketball - Active Bet */}
-          <button className="w-full text-left glass-card bet-glow rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale">
+          <button 
+            onClick={() => alert("Game details: LAL vs BOS - NBA Regular Season")}
+            className="w-full text-left glass-card bet-glow rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale cursor-pointer"
+          >
             <div className="flex items-center gap-4 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center bg-surface-container-high w-16 h-16 rounded-xl border border-outline-variant/30 shrink-0">
                 <span className="text-primary font-headline text-xl font-bold">3Q</span>
@@ -99,7 +131,9 @@ export default function Home() {
           </button>
 
           {/* Football - Neutral */}
-          <button className="w-full text-left glass-card rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale">
+          <button 
+            onClick={() => alert("Game details: KC vs PHI - NFL Sunday Night")}
+            className="w-full text-left glass-card rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale cursor-pointer">
             <div className="flex items-center gap-4 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center bg-surface-container-high group-hover:bg-surface-container-highest w-16 h-16 rounded-xl border border-outline-variant/30 transition-colors shrink-0">
                 <span className="text-on-surface font-headline text-xl font-bold">4Q</span>
@@ -142,7 +176,9 @@ export default function Home() {
           </button>
 
           {/* Soccer - Active Bet */}
-          <button className="w-full text-left glass-card bet-glow rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale">
+          <button 
+            onClick={() => alert("Game details: ARS vs MUN - Premier League")}
+            className="w-full text-left glass-card bet-glow rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-surface-container-high/60 transition-all duration-300 group interactive-scale cursor-pointer">
             <div className="flex items-center gap-4 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center bg-surface-container-high w-16 h-16 rounded-xl border border-outline-variant/30 shrink-0">
                 <span className="text-primary font-headline text-xl font-bold">2H</span>
