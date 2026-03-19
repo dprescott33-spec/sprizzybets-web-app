@@ -5,286 +5,275 @@ import { useState } from "react";
 
 export default function TrackerPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("tracker");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [timePeriod, setTimePeriod] = useState("1M");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const betHistory = [
-    { id: 1, game: "Lakers vs Warriors", type: "Spread", pick: "LAL -4.5", stake: "$100", odds: "-110", result: "Won", returnVal: "+$91", date: "Dec 15, 2024" },
-    { id: 2, game: "Chiefs vs Eagles", type: "ML", pick: "Chiefs", stake: "$250", odds: "-120", result: "Lost", returnVal: "-$250", date: "Dec 14, 2024" },
-    { id: 3, game: "Liverpool vs Man City", type: "Over", pick: "Over 2.5", stake: "$150", odds: "-110", result: "Won", returnVal: "+$136", date: "Dec 13, 2024" },
-    { id: 4, game: "Texas vs Oklahoma", type: "Spread", pick: "TXS +3.0", stake: "$200", odds: "-110", result: "Won", returnVal: "+$182", date: "Dec 12, 2024" }
+  const recentBets = [
+    { id: 1, time: "Today 2:45 PM", matchup: "GSW -4.5 vs Suns", market: "Spread", edge: "+3.2%", status: "WIN", pnl: "+$215.00" },
+    { id: 2, time: "Yesterday 8:12 PM", matchup: "U 224.5 Heat vs Lakers", market: "Total", edge: "-1.8%", status: "LOSS", pnl: "-$110.00" },
+    { id: 3, time: "2 days ago 7:33 PM", matchup: "DEN ML vs Mavericks", market: "Moneyline", edge: "+5.1%", status: "WIN", pnl: "+$450.00" },
+    { id: 4, time: "3 days ago 1:15 PM", matchup: "BOS -9.0 vs Nets", market: "Spread", edge: "+2.4%", status: "WIN", pnl: "+$180.00" }
   ];
 
-  const filteredBets = betHistory.filter(bet => 
-    bet.game.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="flex min-h-screen bg-surface text-on-background font-body">
+    <div className="flex min-h-screen bg-[#060e20] text-white font-body overflow-hidden">
+      {/* Animated background glows */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#3fff8b]/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-[#6e9bff]/10 rounded-full blur-3xl"></div>
+      </div>
+
       {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-full w-64 z-40 bg-slate-950/40 backdrop-blur-2xl border-r border-slate-800/20 flex flex-col pt-20 pb-8 px-4 hidden lg:flex">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 z-40 bg-slate-950/40 backdrop-blur-2xl border-r border-white/10 flex-col pt-8 pb-8 px-4">
         <div className="mb-8 px-2">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-primary-container text-sm">analytics</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3fff8b] to-[#3fff8b]/60 flex items-center justify-center">
+              <span className="material-symbols-outlined text-black text-sm">bolt</span>
             </div>
             <div>
-              <h2 className="text-emerald-400 font-extrabold text-lg leading-tight">SprizzyBet</h2>
-              <p className="text-slate-500 text-xs font-semibold">The Ethereal Analyst</p>
+              <h2 className="text-[#3fff8b] font-extrabold text-lg leading-tight">SprizzyBet</h2>
             </div>
           </div>
         </div>
         <nav className="flex-1 space-y-1">
           <button
             onClick={() => router.push("/")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/30 hover:text-slate-200 rounded-xl transition-all text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all text-left text-sm hover:bg-white/5"
           >
             <span className="material-symbols-outlined">dynamic_feed</span>
-            <span className="font-semibold text-sm">Feed</span>
+            <span className="font-semibold">Feed</span>
           </button>
           <button
             onClick={() => router.push("/scores")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/30 hover:text-slate-200 rounded-xl transition-all text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all text-left text-sm hover:bg-white/5"
           >
             <span className="material-symbols-outlined">sports_score</span>
-            <span className="font-semibold text-sm">Scores</span>
+            <span className="font-semibold">Scores</span>
           </button>
           <button
-            onClick={() => setActiveTab("tracker")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-emerald-400 bg-emerald-500/10 border-r-4 border-emerald-400 rounded-l-xl translate-x-1 transition-transform text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#3fff8b] bg-[#3fff8b]/10 rounded-xl transition-all text-left text-sm border-l-2 border-[#3fff8b]"
           >
             <span className="material-symbols-outlined">analytics</span>
-            <span className="font-semibold text-sm">Tracker</span>
+            <span className="font-semibold">Tracker</span>
           </button>
           <button
             onClick={() => router.push("/profile")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/30 hover:text-slate-200 rounded-xl transition-all text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-all text-left text-sm hover:bg-white/5"
           >
             <span className="material-symbols-outlined">person</span>
-            <span className="font-semibold text-sm">Profile</span>
+            <span className="font-semibold">Profile</span>
           </button>
         </nav>
-        <div className="mt-auto space-y-1 pt-6 border-t border-outline-variant/10">
-          <button className="w-full bg-primary text-on-primary font-bold py-3 rounded-full mb-4 shadow-lg shadow-primary/10 hover:scale-105 active:opacity-80 transition-all">
+        <div className="mt-auto space-y-3 pt-6 border-t border-white/5">
+          <button className="w-full bg-gradient-to-r from-[#3fff8b] to-[#3fff8b]/80 text-black font-bold py-3 rounded-full mb-2 shadow-lg shadow-[#3fff8b]/20 hover:scale-[1.02] active:opacity-80 transition-all text-sm">
             Place New Bet
-          </button>
-          <button className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-200 text-sm font-semibold text-left">
-            <span className="material-symbols-outlined text-lg">settings</span>
-            Settings
-          </button>
-          <button className="w-full flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-200 text-sm font-semibold text-left">
-            <span className="material-symbols-outlined text-lg">help</span>
-            Support
           </button>
         </div>
       </aside>
 
       {/* Top App Bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/60 backdrop-blur-xl border-b border-slate-800/20 shadow-2xl shadow-emerald-900/10 flex justify-between items-center px-8 py-4">
-        <div className="flex items-center gap-8">
-          <h1 className="text-2xl font-black tracking-tighter text-emerald-400 font-headline">SprizzyBet</h1>
-          <nav className="hidden md:flex gap-6 items-center">
-            <button onClick={() => router.push("/")} className="font-medium text-slate-400 hover:bg-slate-800/50 hover:text-emerald-300 transition-all px-3 py-1 rounded-lg">
-              Feed
-            </button>
-            <button onClick={() => router.push("/scores")} className="font-medium text-slate-400 hover:bg-slate-800/50 hover:text-emerald-300 transition-all px-3 py-1 rounded-lg">
-              Scores
-            </button>
-            <button className="font-medium text-emerald-400 border-b-2 border-emerald-400 px-3 py-1">
-              Tracker
-            </button>
-            <button onClick={() => router.push("/profile")} className="font-medium text-slate-400 hover:bg-slate-800/50 hover:text-emerald-300 transition-all px-3 py-1 rounded-lg">
-              Profile
-            </button>
-          </nav>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/40 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 py-4">
+        <div className="flex items-center gap-8 flex-1">
+          <h1 className="text-xl font-black text-[#3fff8b] hidden lg:block">SprizzyBet</h1>
         </div>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 bg-surface-container-high px-4 py-2 rounded-full border border-outline-variant/20">
-            <span className="material-symbols-outlined text-emerald-400 text-lg">account_balance_wallet</span>
-            <span className="font-bold text-emerald-400">$2,450.00</span>
+          <div className="hidden md:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur">
+            <span className="material-symbols-outlined text-[#3fff8b]">account_balance_wallet</span>
+            <span className="font-bold text-sm">$2,450.00</span>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
-            <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-primary/20">
-              <img 
-                alt="User" 
-                className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh_shodIWOfVCujH6nVMuefOMdyPg0LRc3gTcOJhZHUZoM1LlZFfJNeux8mYUKVQiLPnJ60Xk9DcnZVeO3A5CS_uQJU38j57nIX-ekqtfT0Bwuo6Hr81H6yiHJTEbz6ys2KfQv3HeGTaeT7uH8W9yPLvyWlocfqLQuRfW2EauFcC3cjdwoBYFohHU2ahM26XiUz021vdwYPOJ8YVm4DQpTfx0IBPgyDA6L7alNyAjdbRuUrZaZMnZsc9n1xj3K-k0X8-7Uh3iHHgqm"
-                width={40}
-                height={40}
-              />
+          <button className="relative p-2 hover:bg-white/5 rounded-full transition-all">
+            <span className="material-symbols-outlined text-slate-300">notifications</span>
+            {/* Notification dot */}
+            <div className="absolute top-1 right-1 w-2 h-2 bg-[#3fff8b] rounded-full"></div>
+          </button>
+          <button className="p-2 hover:bg-white/5 rounded-full transition-all">
+            <span className="material-symbols-outlined text-slate-300">settings</span>
+          </button>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3fff8b] to-[#6e9bff] p-0.5">
+            <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[#3fff8b] text-lg">person</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="lg:ml-64 pt-24 px-8 pb-12 w-full">
-        {/* Header */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-extrabold font-headline tracking-tight mb-1">Performance Tracker</h2>
-          <p className="text-on-surface-variant text-sm">Detailed analytics and bet history</p>
+      <main className="lg:ml-64 pt-24 px-4 md:px-8 pb-12 w-full overflow-y-auto">
+        {/* Performance Metrics Bento */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Total Profit Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all hover:border-white/20">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Profit</p>
+              <span className="material-symbols-outlined text-[#3fff8b]">trending_up</span>
+            </div>
+            <p className="text-3xl font-black text-[#3fff8b] mb-1">+$4,120.45</p>
+            <p className="text-xs text-slate-400">+12.4% this month</p>
+          </div>
+
+          {/* Win Rate Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all hover:border-white/20">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Win Rate</p>
+              <span className="material-symbols-outlined text-[#6e9bff]">percent</span>
+            </div>
+            <p className="text-3xl font-black text-[#6e9bff] mb-2">58%</p>
+            <div className="w-full bg-white/5 rounded-full h-1.5">
+              <div className="bg-gradient-to-r from-[#6e9bff] to-[#3fff8b] h-1.5 rounded-full" style={{ width: '58%' }}></div>
+            </div>
+          </div>
+
+          {/* ROI Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all hover:border-white/20">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">ROI</p>
+              <span className="material-symbols-outlined text-[#ff716c]">show_chart</span>
+            </div>
+            <p className="text-3xl font-black text-[#3fff8b] mb-1">22.8%</p>
+            <p className="text-xs text-slate-400">vs 18.2% market avg</p>
+          </div>
+
+          {/* Active Bets Card */}
+          <div className="bg-gradient-to-br from-[#3fff8b]/20 to-[#6e9bff]/10 backdrop-blur-xl border border-[#3fff8b]/30 rounded-2xl p-6 hover:border-[#3fff8b]/50 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Bets</p>
+              <span className="material-symbols-outlined text-[#3fff8b]">task</span>
+            </div>
+            <p className="text-3xl font-black text-white mb-1">12</p>
+            <p className="text-xs text-[#3fff8b]">$840.00 at risk</p>
+          </div>
         </div>
 
-        {/* Performance Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
-          <div className="glass-card rounded-2xl p-6 bg-gradient-to-br from-primary/10 to-primary/5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Bankroll</p>
-              <span className="material-symbols-outlined text-primary text-lg">trending_up</span>
-            </div>
-            <p className="text-3xl font-black font-headline text-primary mb-1">$2,450.00</p>
-            <p className="text-xs text-primary font-bold">+$450.00 vs starter (+22.5%)</p>
-          </div>
-
-          <div className="glass-card rounded-2xl p-6 bg-gradient-to-br from-tertiary/10 to-tertiary/5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Win Rate</p>
-              <span className="material-symbols-outlined text-tertiary text-lg">percent</span>
-            </div>
-            <p className="text-3xl font-black font-headline text-tertiary mb-1">58%</p>
-            <p className="text-xs text-on-surface-variant font-bold">29 wins / 50 total bets</p>
-          </div>
-
-          <div className="glass-card rounded-2xl p-6 bg-gradient-to-br from-emerald-900/20 to-emerald-900/5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">ROI</p>
-              <span className="material-symbols-outlined text-emerald-400 text-lg">trending_up</span>
-            </div>
-            <p className="text-3xl font-black font-headline text-emerald-400 mb-1">22.8%</p>
-            <p className="text-xs text-on-surface-variant font-bold">Avg. stake: $80 / bet</p>
-          </div>
-
-          <div className="glass-card rounded-2xl p-6 bg-gradient-to-br from-slate-600/10 to-slate-600/5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Avg Odds</p>
-              <span className="material-symbols-outlined text-on-surface-variant text-lg">equalizer</span>
-            </div>
-            <p className="text-3xl font-black font-headline text-on-surface mb-1">-108</p>
-            <p className="text-xs text-on-surface-variant font-bold">Typically -110 to -120 range</p>
-          </div>
-        </div>
-
-        {/* Bankroll Progression Chart */}
-        <div className="glass-card rounded-2xl p-8 mb-12">
-          <h3 className="text-xl font-headline font-extrabold mb-6 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">show_chart</span>
-            Bankroll Progression
-          </h3>
-          
-          <div className="relative h-80 mb-8">
-            {/* Pseudo chart visualization */}
-            <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between px-4 h-64 gap-2">
-              {[
-                { val: 2000, date: "1 wk ago" },
-                { val: 2050, date: "" },
-                { val: 1950, date: "" },
-                { val: 2100, date: "" },
-                { val: 2280, date: "" },
-                { val: 2450, date: "Today" },
-              ].map((point, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center">
-                  <div 
-                    className="w-full rounded-t-lg bg-gradient-to-t from-primary/60 to-primary/30 backdrop-blur-sm border border-primary/30 transition-all hover:from-primary/80 hover:to-primary/50 cursor-pointer"
-                    style={{ height: `${(point.val / 2450) * 100}%` }}
-                  ></div>
-                  {point.date && <p className="text-[0.625rem] text-on-surface-variant font-bold mt-2 text-center">{point.date}</p>}
-                </div>
+        {/* Bankroll Chart */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#3fff8b]">show_chart</span>
+              <span>Bankroll Progression</span>
+            </h3>
+            <div className="flex gap-2">
+              {['1W', '1M', '3M', 'ALL'].map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setTimePeriod(period)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    timePeriod === period
+                      ? 'bg-[#3fff8b] text-black'
+                      : 'bg-white/5 text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  {period}
+                </button>
               ))}
             </div>
           </div>
 
+          {/* SVG Chart */}
+          <div className="relative h-64 mb-6">
+            <svg viewBox="0 0 600 200" className="w-full h-full">
+              {/* Gradient definition */}
+              <defs>
+                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#3fff8b" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#3fff8b" stopOpacity="0" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              {/* Path area */}
+              <path
+                d="M 0 150 Q 100 120 150 100 T 300 80 T 450 60 T 600 40"
+                fill="url(#chartGradient)"
+              />
+              {/* Line stroke */}
+              <path
+                d="M 0 150 Q 100 120 150 100 T 300 80 T 450 60 T 600 40"
+                stroke="#3fff8b"
+                strokeWidth="2"
+                fill="none"
+                filter="url(#glow)"
+              />
+              {/* Data points at peak */}
+              <circle cx="600" cy="40" r="4" fill="#3fff8b" stroke="#3fff8b" strokeWidth="1" />
+              {/* Tooltip */}
+              <text x="575" y="25" fontSize="12" fill="#3fff8b" fontWeight="bold">$12,450</text>
+            </svg>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-surface-container-low p-3 rounded-lg">
-              <p className="text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-tighter mb-1">Peak Bankroll</p>
-              <p className="font-bold text-lg">$2,450</p>
+            <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Oct 01</p>
+              <p className="text-sm font-bold">$2,000</p>
             </div>
-            <div className="bg-surface-container-low p-3 rounded-lg">
-              <p className="text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-tighter mb-1">Lowest Point</p>
-              <p className="font-bold text-lg">$1,920</p>
+            <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Mid Oct</p>
+              <p className="text-sm font-bold">$2,100</p>
             </div>
-            <div className="bg-surface-container-low p-3 rounded-lg">
-              <p className="text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-tighter mb-1">Variance</p>
-              <p className="font-bold text-lg">$530</p>
+            <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Nov 01</p>
+              <p className="text-sm font-bold">$2,300</p>
             </div>
-            <div className="bg-primary/10 p-3 rounded-lg border border-primary/20">
-              <p className="text-[0.625rem] font-bold text-primary uppercase tracking-tighter mb-1">Trend</p>
-              <p className="font-bold text-lg text-primary">
-                <span className="material-symbols-outlined text-sm align-middle">trending_up</span> Bullish
-              </p>
+            <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Today</p>
+              <p className="text-sm font-bold text-[#3fff8b]">$12,450</p>
             </div>
           </div>
         </div>
 
-        {/* Bet History */}
-        <div className="glass-card rounded-2xl p-8">
+        {/* Recent Bet Outcomes Table */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-headline font-extrabold flex items-center gap-2">
-              <span className="material-symbols-outlined text-tertiary">history</span>
-              Bet History
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#6e9bff]">history</span>
+              <span>Recent Bet Outcomes</span>
             </h3>
-            <button className="p-2 rounded-full bg-surface-container-high hover:bg-surface-bright transition-all">
-              <span className="material-symbols-outlined text-on-surface-variant">download</span>
-            </button>
-          </div>
-
-          {/* Search / Filter */}
-          <div className="mb-6 flex gap-3">
-            <div className="flex-1 relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-              <input 
-                type="text"
-                placeholder="Search games..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-surface-container-high pl-10 pr-4 py-2 rounded-lg text-sm text-on-background placeholder-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <button className="px-4 py-2 rounded-lg bg-surface-container-high font-bold text-sm hover:bg-surface-bright transition-all">
-              Filter
+            <button className="p-2 rounded-lg hover:bg-white/10 transition-all">
+              <span className="material-symbols-outlined text-slate-300">download</span>
             </button>
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-outline-variant/20 text-left text-[0.6875rem] font-bold text-on-surface-variant uppercase tracking-wide">
-                  <th className="pb-3 px-3 text-left">Game</th>
-                  <th className="pb-3 px-3 text-center">Type</th>
-                  <th className="pb-3 px-3 text-center">Pick</th>
-                  <th className="pb-3 px-3 text-right">Stake</th>
-                  <th className="pb-3 px-3 text-center">Odds</th>
-                  <th className="pb-3 px-3 text-center">Result</th>
-                  <th className="pb-3 px-3 text-right">Return</th>
-                  <th className="pb-3 px-3 text-right">Date</th>
+                <tr className="border-b border-white/10">
+                  <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Date / Time</th>
+                  <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Matchup</th>
+                  <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Market</th>
+                  <th className="pb-3 px-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Edge</th>
+                  <th className="pb-3 px-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="pb-3 px-3 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Profit/Loss</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredBets.map((bet) => (
-                  <tr key={bet.id} className="border-b border-outline-variant/10 hover:bg-surface-container-high/50 transition-colors text-sm">
-                    <td className="py-4 px-3 font-bold text-on-background">{bet.game}</td>
+                {recentBets.map((bet) => (
+                  <tr key={bet.id} className="border-b border-white/5 hover:bg-white/5 transition-all">
+                    <td className="py-4 px-3 text-slate-300 font-medium">{bet.time}</td>
+                    <td className="py-4 px-3 font-bold text-white">{bet.matchup}</td>
+                    <td className="py-4 px-3 text-slate-400 text-sm">{bet.market}</td>
+                    <td className="py-4 px-3 text-center text-slate-300">{bet.edge}</td>
                     <td className="py-4 px-3 text-center">
-                      <span className="inline-block px-2 py-1 bg-surface-container rounded text-[0.625rem] font-bold">{bet.type}</span>
-                    </td>
-                    <td className="py-4 px-3 text-center text-on-surface-variant">{bet.pick}</td>
-                    <td className="py-4 px-3 text-right font-bold">{bet.stake}</td>
-                    <td className="py-4 px-3 text-center text-on-surface-variant">{bet.odds}</td>
-                    <td className="py-4 px-3 text-center">
-                      <span className={`inline-block px-3 py-1 rounded-full text-[0.625rem] font-bold ${
-                        bet.result === "Won" 
-                          ? "bg-primary/20 text-primary" 
-                          : "bg-secondary/20 text-secondary"
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
+                        bet.status === 'WIN'
+                          ? 'bg-[#3fff8b]/20 text-[#3fff8b]'
+                          : 'bg-[#ff716c]/20 text-[#ff716c]'
                       }`}>
-                        {bet.result}
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          bet.status === 'WIN' ? 'bg-[#3fff8b]' : 'bg-[#ff716c]'
+                        }`}></span>
+                        {bet.status}
                       </span>
                     </td>
-                    <td className={`py-4 px-3 text-right font-black ${
-                      bet.returnVal.includes("+") ? "text-primary" : "text-secondary"
+                    <td className={`py-4 px-3 text-right font-bold ${
+                      bet.pnl.includes('+') ? 'text-[#3fff8b]' : 'text-[#ff716c]'
                     }`}>
-                      {bet.returnVal}
+                      {bet.pnl}
                     </td>
-                    <td className="py-4 px-3 text-right text-on-surface-variant text-xs">{bet.date}</td>
                   </tr>
                 ))}
               </tbody>
@@ -293,17 +282,10 @@ export default function TrackerPage() {
 
           {/* Pagination */}
           <div className="mt-6 flex items-center justify-between">
-            <p className="text-xs text-on-surface-variant font-bold">Showing {filteredBets.length} of {betHistory.length} bets</p>
-            <div className="flex gap-2">
-              <button className="px-3 py-2 rounded-lg bg-surface-container-high hover:bg-surface-bright transition-all text-sm font-bold disabled:opacity-50" disabled>
-                <span className="material-symbols-outlined">chevron_left</span>
-              </button>
-              <button className="px-3 py-2 rounded-lg bg-primary text-on-primary font-bold text-sm">1</button>
-              <button className="px-3 py-2 rounded-lg bg-surface-container-high hover:bg-surface-bright text-sm font-bold">2</button>
-              <button className="px-3 py-2 rounded-lg bg-surface-container-high hover:bg-surface-bright transition-all text-sm font-bold">
-                <span className="material-symbols-outlined">chevron_right</span>
-              </button>
-            </div>
+            <p className="text-xs text-slate-400 font-semibold">Showing 4 recent bets</p>
+            <button className="px-4 py-2 rounded-lg bg-[#3fff8b]/20 text-[#3fff8b] font-semibold text-sm hover:bg-[#3fff8b]/30 transition-all">
+              Load More History
+            </button>
           </div>
         </div>
       </main>
