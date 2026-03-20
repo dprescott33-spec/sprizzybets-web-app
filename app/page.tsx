@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { app } from "@/lib/firebase";
 
 interface Recommendation {
   id: number;
@@ -26,11 +25,6 @@ interface BetRecord {
 
 export default function Home() {
   const router = useRouter();
-
-  useEffect(() => {
-    // Log to console to verify Firebase app is initialized
-    console.log("Firebase app initialized:", app.name);
-  }, []);
 
   const recommendations: Recommendation[] = [
     { id: 101, matchup: "Saint Louis vs Georgia", league: "NCAA Basketball", status: "Starts in 2h 14m", line: "SLU -2.5", overUnder: "O 169.5" },
