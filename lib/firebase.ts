@@ -30,15 +30,15 @@ const firebaseConfig = {
     "G-TL7X7FS22E",
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-let analytics: Analytics | undefined; // Analytics is optional
-let auth: Auth | undefined; // <--- Declare auth variable (may be undefined on server)
+// Initialize Firebase - only in browser environment
+let app: FirebaseApp | undefined;
+let analytics: Analytics | undefined;
+let auth: Auth | undefined;
 
-try {
-  app = initializeApp(firebaseConfig);
-  // Only initialize Analytics and Auth in the browser environment
-  if (typeof window !== "undefined") {
+// Firebase must only initialize in the browser
+if (typeof window !== "undefined") {
+  try {
+    app = initializeApp(firebaseConfig);
     // Initialize Analytics only when measurementId is present
     if (firebaseConfig.measurementId) {
       try {
@@ -52,10 +52,9 @@ try {
     } catch (e) {
       console.warn("Firebase auth not initialized:", e);
     }
+  } catch (error) {
+    console.error("Firebase initialization error", error);
   }
-} catch (error) {
-  console.error("Firebase initialization error", error);
-  throw error;
 }
 
 // Export the initialized Firebase app, Analytics, and Auth instances
