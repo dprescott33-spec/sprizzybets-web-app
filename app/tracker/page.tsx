@@ -1,19 +1,38 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TrackerPage() {
   const router = useRouter();
   const [timePeriod, setTimePeriod] = useState("1M");
   const [currentPage, setCurrentPage] = useState(1);
+  const [savedBets, setSavedBets] = useState<any[]>([]);
 
-  const recentBets = [
-    { id: 1, time: "Today 2:45 PM", matchup: "GSW -4.5 vs Suns", market: "Spread", edge: "+3.2%", status: "WIN", pnl: "+$215.00" },
-    { id: 2, time: "Yesterday 8:12 PM", matchup: "U 224.5 Heat vs Lakers", market: "Total", edge: "-1.8%", status: "LOSS", pnl: "-$110.00" },
-    { id: 3, time: "2 days ago 7:33 PM", matchup: "DEN ML vs Mavericks", market: "Moneyline", edge: "+5.1%", status: "WIN", pnl: "+$450.00" },
-    { id: 4, time: "3 days ago 1:15 PM", matchup: "BOS -9.0 vs Nets", market: "Spread", edge: "+2.4%", status: "WIN", pnl: "+$180.00" }
+  // Load saved bets from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("trackerBets");
+    if (stored) {
+      setSavedBets(JSON.parse(stored));
+    }
+  }, []);
+
+  // Default demo bets if none exist
+  const recentBets = savedBets.length > 0 ? savedBets : [
+    { id: 1, time: "Today 2:45 PM", matchup: "GSW -4.5 vs Suns", market: "Spread", edge: "+3.2%", status: "WIN", pnl: "+$215.00", units: 1 },
+    { id: 2, time: "Yesterday 8:12 PM", matchup: "U 224.5 Heat vs Lakers", market: "Total", edge: "-1.8%", status: "LOSS", pnl: "-$110.00", units: 1 },
+    { id: 3, time: "2 days ago 7:33 PM", matchup: "DEN ML vs Mavericks", market: "Moneyline", edge: "+5.1%", status: "WIN", pnl: "+$450.00", units: 1 },
+    { id: 4, time: "3 days ago 1:15 PM", matchup: "BOS -9.0 vs Nets", market: "Spread", edge: "+2.4%", status: "WIN", pnl: "+$180.00", units: 1 }
   ];
+
+  // Calculate performance metrics
+  const totalBets = recentBets.length;
+  const wins = recentBets.filter(b => b.status === "WIN").length;
+  const losses = recentBets.filter(b => b.status === "LOSS").length;
+  const winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
+  const roi = 23.2; // Placeholder - would be calculated from actual P&L
+  const totalUnits = recentBets.reduce((sum, b) => sum + (b.units || 1), 0);
+  const activeBets = recentBets.filter(b => b.status === "pending" || b.status === "Pending").length;
 
   return (
     <div className="flex min-h-screen bg-[#060e20] text-white font-body overflow-hidden">
@@ -104,11 +123,11 @@ export default function TrackerPage() {
           {/* Total Profit Card */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all hover:border-white/20">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Profit</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bets</p>
               <span className="material-symbols-outlined text-[#3fff8b]">trending_up</span>
             </div>
-            <p className="text-3xl font-black text-[#3fff8b] mb-1">+$4,120.45</p>
-            <p className="text-xs text-slate-400">+12.4% this month</p>
+            <p className="text-3xl font-black text-[#3fff8b] mb-1">{totalBets}</p>
+            <p className="text-xs text-slate-400">{wins}W - {losses}L</p>
           </div>
 
           {/* Win Rate Card */}
@@ -117,9 +136,9 @@ export default function TrackerPage() {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Win Rate</p>
               <span className="material-symbols-outlined text-[#6e9bff]">percent</span>
             </div>
-            <p className="text-3xl font-black text-[#6e9bff] mb-2">58%</p>
+            <p className="text-3xl font-black text-[#6e9bff] mb-2">{winRate}%</p>
             <div className="w-full bg-white/5 rounded-full h-1.5">
-              <div className="bg-gradient-to-r from-[#6e9bff] to-[#3fff8b] h-1.5 rounded-full" style={{ width: '58%' }}></div>
+              <div className="bg-gradient-to-r from-[#6e9bff] to-[#3fff8b] h-1.5 rounded-full" style={{ width: `${winRate}%` }}></div>
             </div>
           </div>
 
@@ -129,18 +148,18 @@ export default function TrackerPage() {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">ROI</p>
               <span className="material-symbols-outlined text-[#ff716c]">show_chart</span>
             </div>
-            <p className="text-3xl font-black text-[#3fff8b] mb-1">22.8%</p>
+            <p className="text-3xl font-black text-[#3fff8b] mb-1">{roi}%</p>
             <p className="text-xs text-slate-400">vs 18.2% market avg</p>
           </div>
 
-          {/* Active Bets Card */}
+          {/* Total Units Card */}
           <div className="bg-gradient-to-br from-[#3fff8b]/20 to-[#6e9bff]/10 backdrop-blur-xl border border-[#3fff8b]/30 rounded-2xl p-6 hover:border-[#3fff8b]/50 transition-all">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Bets</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Units</p>
               <span className="material-symbols-outlined text-[#3fff8b]">task</span>
             </div>
-            <p className="text-3xl font-black text-white mb-1">12</p>
-            <p className="text-xs text-[#3fff8b]">$840.00 at risk</p>
+            <p className="text-3xl font-black text-white mb-1">{totalUnits}</p>
+            <p className="text-xs text-[#3fff8b]">Units wagered</p>
           </div>
         </div>
 
@@ -244,35 +263,41 @@ export default function TrackerPage() {
                 <tr className="border-b border-white/10">
                   <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Date / Time</th>
                   <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Matchup</th>
-                  <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Market</th>
-                  <th className="pb-3 px-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Edge</th>
+                  <th className="pb-3 px-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Bet Type</th>
+                  <th className="pb-3 px-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Units</th>
                   <th className="pb-3 px-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="pb-3 px-3 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Profit/Loss</th>
+                  <th className="pb-3 px-3 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Result</th>
                 </tr>
               </thead>
               <tbody>
-                {recentBets.map((bet) => (
+                {recentBets.slice(0, 10).map((bet) => (
                   <tr key={bet.id} className="border-b border-white/5 hover:bg-white/5 transition-all">
-                    <td className="py-4 px-3 text-slate-300 font-medium">{bet.time}</td>
-                    <td className="py-4 px-3 font-bold text-white">{bet.matchup}</td>
-                    <td className="py-4 px-3 text-slate-400 text-sm">{bet.market}</td>
-                    <td className="py-4 px-3 text-center text-slate-300">{bet.edge}</td>
+                    <td className="py-4 px-3 text-slate-300 font-medium text-xs">{bet.time || bet.timestamp || "Pending"}</td>
+                    <td className="py-4 px-3 font-bold text-white text-sm">{bet.matchup}</td>
+                    <td className="py-4 px-3 text-slate-400 text-xs">
+                      <span className="inline-block px-2 py-1 rounded bg-white/5 border border-white/10">
+                        {bet.betType || bet.market || "Spread"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-3 text-center text-slate-300 font-semibold">{bet.units || 1}</td>
                     <td className="py-4 px-3 text-center">
                       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
                         bet.status === 'WIN'
                           ? 'bg-[#3fff8b]/20 text-[#3fff8b]'
-                          : 'bg-[#ff716c]/20 text-[#ff716c]'
+                          : bet.status === 'LOSS'
+                          ? 'bg-[#ff716c]/20 text-[#ff716c]'
+                          : 'bg-[#6e9bff]/20 text-[#6e9bff]'
                       }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${
-                          bet.status === 'WIN' ? 'bg-[#3fff8b]' : 'bg-[#ff716c]'
+                          bet.status === 'WIN' ? 'bg-[#3fff8b]' : bet.status === 'LOSS' ? 'bg-[#ff716c]' : 'bg-[#6e9bff]'
                         }`}></span>
-                        {bet.status}
+                        {bet.status || "Pending"}
                       </span>
                     </td>
-                    <td className={`py-4 px-3 text-right font-bold ${
-                      bet.pnl.includes('+') ? 'text-[#3fff8b]' : 'text-[#ff716c]'
+                    <td className={`py-4 px-3 text-right font-bold text-sm ${
+                      bet.pnl && bet.pnl.includes('+') ? 'text-[#3fff8b]' : 'text-[#ff716c]'
                     }`}>
-                      {bet.pnl}
+                      {bet.pnl || bet.result || "-"}
                     </td>
                   </tr>
                 ))}
@@ -282,10 +307,14 @@ export default function TrackerPage() {
 
           {/* Pagination */}
           <div className="mt-6 flex items-center justify-between">
-            <p className="text-xs text-slate-400 font-semibold">Showing 4 recent bets</p>
-            <button className="px-4 py-2 rounded-lg bg-[#3fff8b]/20 text-[#3fff8b] font-semibold text-sm hover:bg-[#3fff8b]/30 transition-all">
-              Load More History
-            </button>
+            <p className="text-xs text-slate-400 font-semibold">Showing {Math.min(10, recentBets.length)} of {recentBets.length} bets</p>
+            {recentBets.length === 0 ? (
+              <p className="text-xs text-slate-400 italic">No bets yet. Start betting from the Feed page!</p>
+            ) : (
+              <button className="px-4 py-2 rounded-lg bg-[#3fff8b]/20 text-[#3fff8b] font-semibold text-sm hover:bg-[#3fff8b]/30 transition-all">
+                Load More History
+              </button>
+            )}
           </div>
         </div>
       </main>
