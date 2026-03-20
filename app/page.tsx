@@ -1,8 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { app } from "@/lib/firebase";
+
+interface Recommendation {
+  id: number;
+  matchup: string;
+  league: string;
+  status: string;
+  line: string;
+  overUnder: string;
+}
+
+interface BetRecord {
+  id: number;
+  time: string;
+  matchup: string;
+  market: "Spread" | "Total" | "Moneyline";
+  selection: string;
+  status: "Pending" | "WIN" | "LOSS";
+  pnl: string;
+  units: number;
+}
 
 export default function Home() {
   const router = useRouter();
@@ -11,6 +31,58 @@ export default function Home() {
     // Log to console to verify Firebase app is initialized
     console.log("Firebase app initialized:", app.name);
   }, []);
+
+  const recommendations: Recommendation[] = [
+    { id: 101, matchup: "Saint Louis vs Georgia", league: "NCAA Basketball", status: "Starts in 2h 14m", line: "SLU -2.5", overUnder: "O 169.5" },
+    { id: 102, matchup: "Lakers vs Celtics", league: "NBA", status: "2nd Half 14:02", line: "LAL -4.5", overUnder: "O 232.5" },
+    { id: 103, matchup: "Liverpool vs Chelsea", league: "EPL", status: "Half Time", line: "LIV -0.5", overUnder: "U 2.5" }
+  ];
+  const [flippedCardId, setFlippedCardId] = useState<number | null>(null);
+  const [pickedBets, setPickedBets] = useState<BetRecord[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("trackerBets");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const nextBetIdRef = useRef(1000);
+
+  const persistTrackerBets = (bets: BetRecord[]) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("trackerBets", JSON.stringify(bets));
+    }
+  };
+
+  const handleNoBet = (id: number) => {
+    setFeedbackMessage(`Skipped bet for ${recommendations.find((r) => r.id === id)?.matchup}`);
+    setTimeout(() => setFeedbackMessage(""), 1500);
+  };
+
+  const handleGoToBet = (id: number) => {
+    setFlippedCardId(id);
+  };
+
+  const handleBetSelection = (recommendation: Recommendation, selection: string, betType: "Spread" | "Total") => {
+    const newBet: BetRecord = {
+      id: nextBetIdRef.current++,
+      time: new Date().toLocaleString(),
+      matchup: recommendation.matchup,
+      market: betType,
+      selection,
+      status: "Pending",
+      pnl: "--",
+      units: 1
+    };
+    const nextBets = [newBet, ...pickedBets];
+    setPickedBets(nextBets);
+    persistTrackerBets(nextBets);
+    setFeedbackMessage(`Placed bet: ${selection} (${betType})`);
+    setFlippedCardId(null);
+    setTimeout(() => setFeedbackMessage(""), 2000);
+  };
 
   const handleNavigationClick = (page: string) => {
     router.push(`/${page}`);
@@ -163,6 +235,77 @@ export default function Home() {
               <p className="text-2xl font-black text-on-surface">3</p>
               <p className="text-xs text-on-surface-variant mt-1">Live bets</p>
             </div>
+          </div>
+
+          {/* Interactive Bet Picks */}
+          <div className="mb-10">
+            <h3 className="text-xl font-headline font-extrabold mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-tertiary">whatshot</span>
+              Today&apos;s AI Picks
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {recommendations.map((rec) => {
+                const isFlipped = flippedCardId === rec.id;
+                return (
+                  <div key={rec.id} className="glass-card rounded-xl p-5 relative overflow-hidden border border-surface-container-high/80">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <p className="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">{rec.league}</p>
+                        <h4 className="font-bold text-lg mt-1">{rec.matchup}</h4>
+                        <p className="text-xs text-on-surface-variant mt-1">{rec.status}</p>
+                      </div>
+                      <p className="text-sm font-black text-primary">{rec.line}</p>
+                    </div>
+
+                    {!isFlipped ? (
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => handleNoBet(rec.id)}
+                          className="flex-1 py-2 rounded-lg bg-red-500/90 text-white flex items-center justify-center gap-2 hover:brightness-110 transition-all"
+                        >
+                          <span className="material-symbols-outlined">close</span>
+                          Not Going to Bet
+                        </button>
+                        <button
+                          onClick={() => handleGoToBet(rec.id)}
+                          className="flex-1 py-2 rounded-lg bg-emerald-500 text-white flex items-center justify-center gap-2 hover:brightness-110 transition-all"
+                        >
+                          <span className="material-symbols-outlined">local_fire_department</span>
+                          Going to Bet
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 mt-4">
+                        <p className="text-xs text-on-surface-variant uppercase tracking-widest">Choose Market</p>
+                        <button
+                          onClick={() => handleBetSelection(rec, `${rec.matchup} | ${rec.line}`, "Spread")}
+                          className="w-full py-2 rounded-lg bg-surface-container-high border border-primary/40 hover:bg-primary/10 transition-all"
+                        >
+                          {rec.line}
+                        </button>
+                        <button
+                          onClick={() => handleBetSelection(rec, `${rec.matchup} | ${rec.overUnder}`, "Total")}
+                          className="w-full py-2 rounded-lg bg-surface-container-high border border-tertiary/40 hover:bg-tertiary/10 transition-all"
+                        >
+                          {rec.overUnder}
+                        </button>
+                        <button
+                          onClick={() => setFlippedCardId(null)}
+                          className="w-full py-2 rounded-lg bg-surface-container-highest border border-outline-variant/40 hover:bg-surface-container-highest/80 transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {feedbackMessage && (
+              <div className="mt-4 p-3 rounded-lg bg-surface-container-high text-sm text-on-surface">
+                {feedbackMessage}
+              </div>
+            )}
           </div>
 
           {/* Live Games */}

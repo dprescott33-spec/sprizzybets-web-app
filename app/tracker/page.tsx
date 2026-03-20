@@ -1,38 +1,64 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
+interface TrackerBet {
+  id: number;
+  time: string;
+  matchup: string;
+  market: string;
+  edge: string;
+  status: "WIN" | "LOSS" | "pending";
+  pnl: string;
+  units: number;
+}
 
 export default function TrackerPage() {
   const router = useRouter();
   const [timePeriod, setTimePeriod] = useState("1M");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [savedBets, setSavedBets] = useState<any[]>([]);
-
-  // Load saved bets from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("trackerBets");
-    if (stored) {
-      setSavedBets(JSON.parse(stored));
+  const [savedBets, setSavedBets] = useState<TrackerBet[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("trackerBets");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
     }
-  }, []);
+  });
 
   // Default demo bets if none exist
-  const recentBets = savedBets.length > 0 ? savedBets : [
+  const defaultBets: TrackerBet[] = [
     { id: 1, time: "Today 2:45 PM", matchup: "GSW -4.5 vs Suns", market: "Spread", edge: "+3.2%", status: "WIN", pnl: "+$215.00", units: 1 },
     { id: 2, time: "Yesterday 8:12 PM", matchup: "U 224.5 Heat vs Lakers", market: "Total", edge: "-1.8%", status: "LOSS", pnl: "-$110.00", units: 1 },
     { id: 3, time: "2 days ago 7:33 PM", matchup: "DEN ML vs Mavericks", market: "Moneyline", edge: "+5.1%", status: "WIN", pnl: "+$450.00", units: 1 },
     { id: 4, time: "3 days ago 1:15 PM", matchup: "BOS -9.0 vs Nets", market: "Spread", edge: "+2.4%", status: "WIN", pnl: "+$180.00", units: 1 }
   ];
+  const recentBets = savedBets.length > 0 ? savedBets : defaultBets;
+
+  const updateBetStatus = (id: number, status: "WIN" | "LOSS") => {
+    const updated = recentBets.map((bet) => {
+      if (bet.id === id) {
+        const pnlValue = status === "WIN" ? +Math.abs((bet.units || 1) * 100).toFixed(0) : -Math.abs((bet.units || 1) * 100).toFixed(0);
+        return {
+          ...bet,
+          status,
+          pnl: `${status === "WIN" ? "+" : "-"}$${Math.abs(pnlValue).toFixed(2)}`,
+        };
+      }
+      return bet;
+    });
+    setSavedBets(updated);
+    localStorage.setItem("trackerBets", JSON.stringify(updated));
+  };
 
   // Calculate performance metrics
   const totalBets = recentBets.length;
   const wins = recentBets.filter(b => b.status === "WIN").length;
   const losses = recentBets.filter(b => b.status === "LOSS").length;
   const winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
-  const roi = 23.2; // Placeholder - would be calculated from actual P&L
+  const roi = 23.2;
   const totalUnits = recentBets.reduce((sum, b) => sum + (b.units || 1), 0);
-  const activeBets = recentBets.filter(b => b.status === "pending" || b.status === "Pending").length;
 
   return (
     <div className="flex min-h-screen bg-[#060e20] text-white font-body overflow-hidden">
@@ -272,11 +298,11 @@ export default function TrackerPage() {
               <tbody>
                 {recentBets.slice(0, 10).map((bet) => (
                   <tr key={bet.id} className="border-b border-white/5 hover:bg-white/5 transition-all">
-                    <td className="py-4 px-3 text-slate-300 font-medium text-xs">{bet.time || bet.timestamp || "Pending"}</td>
+                    <td className="py-4 px-3 text-slate-300 font-medium text-xs">{bet.time}</td>
                     <td className="py-4 px-3 font-bold text-white text-sm">{bet.matchup}</td>
                     <td className="py-4 px-3 text-slate-400 text-xs">
                       <span className="inline-block px-2 py-1 rounded bg-white/5 border border-white/10">
-                        {bet.betType || bet.market || "Spread"}
+                        {bet.market}
                       </span>
                     </td>
                     <td className="py-4 px-3 text-center text-slate-300 font-semibold">{bet.units || 1}</td>
@@ -293,11 +319,27 @@ export default function TrackerPage() {
                         }`}></span>
                         {bet.status || "Pending"}
                       </span>
+                      {bet.status === 'pending' && (
+                        <div className="mt-2 flex justify-center gap-2">
+                          <button
+                            onClick={() => updateBetStatus(bet.id, 'WIN')}
+                            className="text-[10px] px-2 py-1 rounded bg-[#3fff8b]/20 text-[#3fff8b] hover:bg-[#3fff8b]/30 transition"
+                          >
+                            WIN
+                          </button>
+                          <button
+                            onClick={() => updateBetStatus(bet.id, 'LOSS')}
+                            className="text-[10px] px-2 py-1 rounded bg-[#ff716c]/20 text-[#ff716c] hover:bg-[#ff716c]/30 transition"
+                          >
+                            LOSS
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className={`py-4 px-3 text-right font-bold text-sm ${
                       bet.pnl && bet.pnl.includes('+') ? 'text-[#3fff8b]' : 'text-[#ff716c]'
                     }`}>
-                      {bet.pnl || bet.result || "-"}
+                      {bet.pnl || "-"}
                     </td>
                   </tr>
                 ))}

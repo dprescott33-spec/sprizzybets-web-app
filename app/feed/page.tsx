@@ -1,23 +1,74 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+interface SavedBet {
+  id: number;
+  gameId: number;
+  timestamp: string;
+  matchup: string;
+  betType: string;
+  league: string;
+  gameTime: string;
+  status: "pending" | "WIN" | "LOSS";
+  result: string | null;
+  units: number;
+}
+
+interface BettingCard {
+  id: number;
+  league: string;
+  gameTime: string;
+  team1: { name: string; logo: string };
+  team2: { name: string; logo: string };
+  homeSpread: string;
+  awaySpread: string;
+  total: number;
+  overOdds: string;
+  underOdds: string;
+  homeSpreadOdds: string;
+  awaySpreadOdds: string;
+  winProb: string;
+  edge: string;
+  confidence: number;
+}
+
+const generateBetId = () => Date.now();
 
 export default function FeedPage() {
   const router = useRouter();
   const [cardIndex, setCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [betHistory, setBetHistory] = useState<number[]>([]);
   const [selectedBetType, setSelectedBetType] = useState<string | null>(null);
-  const [savedBets, setSavedBets] = useState<any[]>([]);
-
-  // Load saved bets from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("trackerBets");
-    if (stored) {
-      setSavedBets(JSON.parse(stored));
+  const [savedBets, setSavedBets] = useState<SavedBet[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("trackerBets");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
     }
-  }, []);
+  });
+
+  const handleNext = useCallback(() => {
+    if (cardIndex < 4) {
+      setCardIndex(cardIndex + 1);
+      setIsFlipped(false);
+    }
+  }, [cardIndex]);
+
+  const handleSkip = handleNext;
+
+  const handleUndo = useCallback(() => {
+    if (savedBets.length > 0) {
+      const updated = savedBets.slice(0, -1);
+      setSavedBets(updated);
+      localStorage.setItem("trackerBets", JSON.stringify(updated));
+      if (cardIndex > 0) setCardIndex(cardIndex - 1);
+      setIsFlipped(false);
+    }
+  }, [cardIndex, savedBets]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -36,9 +87,9 @@ export default function FeedPage() {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isFlipped, selectedBetType, cardIndex]);
+  }, [isFlipped, selectedBetType, handleNext, handleUndo]);
 
-  const bettingCards = [
+  const bettingCards: BettingCard[] = [
     {
       id: 1,
       league: "NCAA Basketball",
@@ -134,8 +185,8 @@ export default function FeedPage() {
   };
 
   const saveBet = (betType: string) => {
-    const newBet = {
-      id: Date.now(),
+    const newBet: SavedBet = {
+      id: generateBetId(),
       gameId: currentCard.id,
       timestamp: new Date().toLocaleString(),
       matchup: `${currentCard.team1.name} vs ${currentCard.team2.name}`,
@@ -151,36 +202,11 @@ export default function FeedPage() {
     setSavedBets(updated);
     localStorage.setItem("trackerBets", JSON.stringify(updated));
     
-    setBetHistory([...betHistory, cardIndex]);
     handleNext();
     setSelectedBetType(null);
   };
 
-  const handleUndo = () => {
-    if (betHistory.length > 0) {
-      const newHistory = [...betHistory];
-      const previousCardIndex = newHistory.pop()!;
-      setBetHistory(newHistory);
-      
-      const updated = savedBets.slice(0, -1);
-      setSavedBets(updated);
-      localStorage.setItem("trackerBets", JSON.stringify(updated));
-      
-      setCardIndex(previousCardIndex);
-      setIsFlipped(false);
-    }
-  };
 
-  const handleNext = () => {
-    if (cardIndex < bettingCards.length - 1) {
-      setCardIndex(cardIndex + 1);
-      setIsFlipped(false);
-    }
-  };
-
-  const handleSkip = () => {
-    handleNext();
-  };
 
   return (
     <div className="flex min-h-screen bg-[#060e20] text-white font-body overflow-hidden">
@@ -511,7 +537,7 @@ export default function FeedPage() {
                   </span>
                 </button>
 
-                {betHistory.length > 0 && (
+                {savedBets.length > 0 && (
                   <button
                     onClick={handleUndo}
                     className="w-16 h-16 rounded-full glass-card flex items-center justify-center text-[#6e9bff] border border-[#6e9bff]/20 hover:bg-[#6e9bff]/10 active:scale-90 transition-all group"

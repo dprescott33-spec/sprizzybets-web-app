@@ -40,8 +40,9 @@ export default function AuthPage() {
 
       // Redirect to home on success
       router.push("/");
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Authentication failed";
+      setError(message);
     } finally {
       setLoading(false);
     }
